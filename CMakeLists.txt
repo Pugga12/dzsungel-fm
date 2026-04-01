@@ -22,7 +22,7 @@ target_compile_definitions(libfixmath PRIVATE
     # FIXMATH_NO_CACHE
     # FIXMATH_NO_HARD_DIVISION
     # FIXMATH_NO_OVERFLOW
-    # FIXMATH_NO_ROUNDING
+    FIXMATH_NO_ROUNDING
     # FIXMATH_OPTIMIZE_8BIT
 )
 
@@ -32,6 +32,7 @@ set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/phase-mod-demo)
 # Assign the include directories
 include_directories(${INCLUDE_DIRS})
 
-set(SOURCE_FILES src/sine.c src/wav.c)
+set(SOURCE_FILES src/sine-fpu.c src/sine-fixed.c src/wav.c src/oscillator.c)
 add_executable(phase-mod-demo ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} PRIVATE m libfixmath)
+target_include_directories(phase-mod-demo PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath)

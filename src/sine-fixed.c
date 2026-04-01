@@ -1,0 +1,71 @@
+#include <math.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "oscillator.h"
+#include "wav.h"
+#include "fix16.h"
+#include "constants.h"
+
+void wtSineDiscretize_fixed16(fix16_t* ptr, int32_t length) {
+    fix16_t lengthFixed = fix16_from_int(length);
+    for (int i = 0; i < length; i++) {
+        fix16_t theta = fix16_mul(
+            TWO_PI_FIX16, 
+            fix16_div(
+                fix16_from_int(i),
+                lengthFixed
+            )
+        );
+
+        ptr[i] = fix16_sin(theta);
+    }
+}
+
+fix16_t linInterp_fixed16(fix16_t* wtPtr, fix16_t x) {
+    int integerPortion = fix16_to_int(x);
+    fix16_t decimal = fix16_sub(x, fix16_from_int(integerPortion));
+    fix16_t a1 = wtPtr[integerPortion];
+    fix16_t a2 = wtPtr[integerPortion + 1];
+    return fix16_add(
+        a1,
+        fix16_mul(
+            decimal,
+            fix16_sub(a2, a1) 
+        )
+    );
+}
+
+void wtFmModulate_fixed16(fix16_t* output, int32_t outputLength, OscillatorF16* carrier, OscillatorF16* modulator) {
+    fix16_t tableLen = fix16_from_int(carrier->tableLen);
+
+    for (int i = 0; i < outputLength; i++) {
+        fix16_t modVal = linInterp_fixed16(modulator->table, fix16_from_float(modulator->phase));
+
+        fix16_t scalingConstant = fix16_div(modulator->tableLen, TWO_PI_FLOAT);
+        fix16_t deviation = fix16_mul(
+            fix16_from_float(modulator->modIndex),
+            fix16_mul(modVal, scalingConstant)
+        );
+
+        fix16_t perturbed = fix16_add(
+            fix16_from_float(carrier->phase),
+            deviation
+        );
+
+        while (perturbed >= tableLen) perturbed = fix16_sub(perturbed, tableLen);
+        while (perturbed < 0) perturbed = fix16_add(perturbed, tableLen);
+
+        output[i] = linInterp_fixed16(carrier->table, perturbed);
+
+        oscF16IncreasePhase(carrier);
+        oscF16IncreasePhase(modulator);
+    }
+}
+
+void fixed16ToInt16(int16_t* outputPtr, fix16_t* inputPtr, size_t len) {
+    for (int i = 0; i < len; i++) {
+        int sampleInt = fix16_to_int(inputPtr[i]);
+        outputPtr[i] = (int16_t)(sampleInt * 32767);
+    }
+}
