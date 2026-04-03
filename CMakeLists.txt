@@ -31,7 +31,7 @@ set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/phase-mod-demo)
 
 # Assign the include directories
 include_directories(${INCLUDE_DIRS})
-set(USE_FIXED_POINT YES)
+set(USE_FIXED_POINT NO)
 
 if (USE_FIXED_POINT)
     set(SOURCE_FILES src/sine-fixed.c src/adsr.c src/wav.c src/oscillator.c)

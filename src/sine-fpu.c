@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "adsr.h"
 #include "oscillator.h"
 #include "wav.h"
 #include "constants.h"
@@ -15,7 +16,7 @@ void wtSineDiscretize(int16_t* ptr, size_t length) {
     }
 }
 
-int16_t linInterp(int16_t* wtPtr, float x) {
+int16_t tableLinInterp(int16_t* wtPtr, float x) {
     int i = (int)x;
     int16_t a1 = wtPtr[i];
     int16_t a2 = wtPtr[i + 1];
@@ -38,7 +39,7 @@ void wtSineRemap(int16_t* wtPtr, int16_t* outputPtr, size_t inputLength, size_t 
     float phaseIncrement = (inputLength * frequency) / sampleRate;
     printf("Phase accumulator increment %f samples\n", phaseIncrement);
     for (int i = 0; i < outputLength; i++) {
-        outputPtr[i] = linInterp(wtPtr, accumulator);
+        outputPtr[i] = tableLinInterp(wtPtr, accumulator);
         accumulator += phaseIncrement;
         if (accumulator >= inputLength) accumulator -= inputLength;
     }
@@ -53,9 +54,11 @@ void wtSineRemap(int16_t* wtPtr, int16_t* outputPtr, size_t inputLength, size_t 
  * @param carrier The oscillator whose frequency will be modulated
  * @param modulator The oscillator that controls the modulation depth
  */
-void wtFmModulate(int16_t* output, size_t outputLength, Oscillator* carrier, Oscillator* modulator) {
+void wtFmModulate(int16_t* output, size_t outputLength, Oscillator* carrier, Oscillator* modulator, ADSR* adsr) {
+    setGate(adsr, true);
+
     for (int i = 0; i < outputLength; i++) {
-        float modVal = linInterp(modulator->table, modulator->phase);
+        float modVal = tableLinInterp(modulator->table, modulator->phase);
         
         float scalingConstant = modulator->tableLen / (2.0f * M_PI);
         float phaseDeviation = modulator->modIndex * (modVal / 32767.0f) * scalingConstant;
@@ -63,12 +66,18 @@ void wtFmModulate(int16_t* output, size_t outputLength, Oscillator* carrier, Osc
         // modulate the carrier by adding the phase deviation to the accumulator value
         float perturbed = carrier->phase + phaseDeviation;
 
+        if (i ==  77170) {
+            setGate(adsr, false);
+        }
+
         // phase accumulator wrapping
         perturbed = fmodf(perturbed, (float)carrier->tableLen);
         while (perturbed < 0) perturbed += carrier->tableLen;
 
         // interpolate to get modulated carrier value; store to outp
-        output[i] = linInterp(carrier->table, perturbed);
+        float amplitude = adsrCalculate(adsr);
+        float outputVal = tableLinInterp(carrier->table, perturbed);
+        output[i] = (int16_t)(outputVal * amplitude);
 
         // increase accumulators
         oscIncreasePhase(carrier);
@@ -90,7 +99,7 @@ void printPoints(int16_t* values, size_t length) {
 int main(int argc, char const *argv[])
 {
     int16_t* wavetablePtr = (int16_t*)malloc(sizeof(int16_t) * 4096);
-    int16_t* modulatedWavePtr = (int16_t*)malloc(sizeof(int16_t) * 44100);
+    int16_t* modulatedWavePtr = (int16_t*)malloc(sizeof(int16_t) * 88200);
 
     wtSineDiscretize(wavetablePtr, 4096);
 
@@ -98,12 +107,15 @@ int main(int argc, char const *argv[])
     oscInit(&mainOscilator, wavetablePtr, 4096, 261.63f, 1, 44100.0f);
 
     Oscillator modulatorOscillator;
-    oscInit(&modulatorOscillator, wavetablePtr, 4096, 392.445f, 10.0f, 44100.0f);
+    oscInit(&modulatorOscillator, wavetablePtr, 4096, 392.445f, 5.0f, 44100.0f);
 
-    wtFmModulate(modulatedWavePtr, 44100, &mainOscilator, &modulatorOscillator);
+    ADSR adsr; 
+    initADSR(&adsr, 200.0f, 200.0f, 500.0f, 0.25f, 44100.0f);
+
+    wtFmModulate(modulatedWavePtr, 88200, &mainOscilator, &modulatorOscillator, &adsr);
     
 //    printPoints(modulatedWavePtr, 4096);
-    writeWavMono("demo.wav", modulatedWavePtr, 44100, 44100);
+    writeWavMono("demo.wav", modulatedWavePtr, 88200, 44100);
 
     free(wavetablePtr);
     free(modulatedWavePtr);
