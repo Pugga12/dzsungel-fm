@@ -1,5 +1,5 @@
 #pragma once
-#include <fix16.h>
+#include <stdint.h>
 #include <stdbool.h>
 
 enum ADSRState {
@@ -13,18 +13,21 @@ enum ADSRState {
 typedef struct 
 {
     int state;
-    float output;
-    float attackTime;
-    float releaseTime;
-    float decayTime;
+    float attackSeconds;
+    float releaseSeconds;
+    float decaySeconds;
     float sustainLevel;
     bool gate; 
     bool prevGate;
-    float sampleRate;
+    uint32_t sampleRate;
     uint32_t sampleCounter;
+
+    float aRatioCache;
+    float dRatioCache;
+    float rRatioCache;
 } ADSR;
 
-void initADSR(ADSR* ptr, float attackTime, float releaseTime, float decayTime, float sustainLevel, float sampleRate);
+bool initADSR(ADSR* ptr, float attackSeconds, float releaseSeconds, float decaySeconds, float sustainLevel, float sampleRate, bool precacheRatios);
 
 void reset(ADSR* ptr);
 

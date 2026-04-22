@@ -6,6 +6,10 @@
 #include "oscillator.h"
 #include "wav.h"
 #include "constants.h"
+#include <assert.h>
+#include <stdbool.h>
+
+#define MS_TO_S(ms) (ms / 1000.0f)
 
 void wtSineDiscretize(int16_t* ptr, size_t length) {
     for (int i = 0; i < length; i++) {
@@ -110,7 +114,10 @@ int main(int argc, char const *argv[])
     oscInit(&modulatorOscillator, wavetablePtr, 4096, 392.445f, 5.0f, 44100.0f);
 
     ADSR adsr; 
-    initADSR(&adsr, 200.0f, 200.0f, 500.0f, 0.25f, 44100.0f);
+    bool adsrValid = initADSR(&adsr, MS_TO_S(200.0f), MS_TO_S(200.0f), MS_TO_S(500.0f), 0.25f, 44100, true);
+    if (!adsrValid) {
+        return -1;
+    }
 
     wtFmModulate(modulatedWavePtr, 88200, &mainOscilator, &modulatorOscillator, &adsr);
     
