@@ -5,6 +5,11 @@
 #define M_PI (3.14159265358979323846264338327950288) // Define M_PI with high precision
 #endif
 
+#ifndef TWO_OVER_PI
+#define TWO_OVER_PI (2/M_PI)
+#endif
+
+
 #ifndef TWO_PI_FLOAT
 #define TWO_PI_FLOAT (2 * M_PI)
 #endif

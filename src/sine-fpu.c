@@ -7,18 +7,10 @@
 #include "wav.h"
 #include "constants.h"
 #include <assert.h>
+#include "wavetablegen.h"
 #include <stdbool.h>
 
 #define MS_TO_S(ms) (ms / 1000.0f)
-
-void wtSineDiscretize(int16_t* ptr, size_t length) {
-    for (int i = 0; i < length; i++) {
-        float theta = (2 * M_PI) * ((float)i / length);
-        float a = sinf(theta);
-        int16_t aInt = (int16_t)(a * 32767);
-        ptr[i] = aInt;
-    }
-}
 
 int16_t tableLinInterp(int16_t* wtPtr, float x) {
     int i = (int)x;
@@ -26,27 +18,6 @@ int16_t tableLinInterp(int16_t* wtPtr, float x) {
     int16_t a2 = wtPtr[i + 1];
     float decimal = x - i;
     return (int16_t)(a1 + (decimal * (a2 - a1)));
-}
-
-/**
- * Generates a new wavetable at a certain frequency, sample rate, and output length 
- * 
- * @param wtPtr The pointer to the wavetable to sample and interpolate from
- * @param outputPtr The pointer to the output buffer. The new wavetable will be written here
- * @param inputLength Number of input points
- * @param outputLength Number of output points
- * @param frequency The frequency of the sine wave to be created
- * @param sampleRate How often we sample from the wavetable. This influences our phase accumulator increment and thus how many samples there are in a single cycle.
- */
-void wtSineRemap(int16_t* wtPtr, int16_t* outputPtr, size_t inputLength, size_t outputLength, float frequency, float sampleRate) {
-    float accumulator = 0.0f;
-    float phaseIncrement = (inputLength * frequency) / sampleRate;
-    printf("Phase accumulator increment %f samples\n", phaseIncrement);
-    for (int i = 0; i < outputLength; i++) {
-        outputPtr[i] = tableLinInterp(wtPtr, accumulator);
-        accumulator += phaseIncrement;
-        if (accumulator >= inputLength) accumulator -= inputLength;
-    }
 }
 
 /**
@@ -105,7 +76,7 @@ void printPoints(int16_t* values, size_t length) {
 
 int main(int argc, char const *argv[])
 {
-    int16_t* wavetablePtr = (int16_t*)malloc(sizeof(int16_t) * 4096);
+    int16_t* wavetablePtr = (int16_t*)malloc(sizeof(int16_t) * WT_SIZE);
     int16_t* modulatedWavePtr = (int16_t*)malloc(sizeof(int16_t) * 88200);
 
     wtSineDiscretize(wavetablePtr, 4096);
