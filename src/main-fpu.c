@@ -1,67 +1,28 @@
-#include <math.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include "dsp/adsr.h"
 #include "dsp/oscillator.h"
 #include "io/wav.h"
-#include "constants.h"
-#include <assert.h>
 #include "dsp/wavetablegen.h"
 #include <stdbool.h>
-
+#include "synth/voice.h"
+#include "synth/mixer.h"
 #define MS_TO_S(ms) (ms / 1000.0f)
 
-float tableLinInterp(float* wtPtr, float x) {
-    int i = (int)x;
-    float a1 = wtPtr[i];
-    float a2 = wtPtr[i + 1];
-    float decimal = x - (float)i;
-    return a1 + decimal * (a2 - a1);
-}
 
-/**
- * Uses phase modulation to modulate a carrier.
- * This makes use of phase modulation, in which the phase of the carrier is offset by the value of the modulator at that point in time
- * 
- * @param output The output buffer to write the synthesized samples to
- * @param outputLength The number of samples to generate
- * @param carrier The oscillator whose frequency will be modulated
- * @param modulator The oscillator that controls the modulation depth
- */
-void wtFmModulate(float* output, size_t outputLength, Oscillator* carrier, Oscillator* modulator, ADSR* adsr) {
-    setGate(adsr, true);
+Oscillator o1C;
+Oscillator o1M;
+Oscillator o2C;
+Oscillator o2M;
+ADSR a1;
+ADSR a2;
 
-    for (int i = 0; i < outputLength; i++) {
-        float modVal = tableLinInterp(modulator->table, modulator->phase);
-        
-        float scalingConstant = modulator->tableLen / (2.0f * M_PI);
-        float phaseDeviation = modulator->modIndex * modVal * scalingConstant;
+float* ob1;
+float* ob2;
+float* sinePtr;
+float* trianglePtr;
 
-        // modulate the carrier by adding the phase deviation to the accumulator value
-        float perturbed = carrier->phase + phaseDeviation;
-
-        if (i ==  77170) {
-            setGate(adsr, false);
-        }
-
-        // phase accumulator wrapping
-        perturbed = fmodf(perturbed, (float)carrier->tableLen);
-        while (perturbed < 0) perturbed += carrier->tableLen;
-
-        #ifdef EXPONENTIAL_ADSR
-            float amplitude = adsrCalculateExp(adsr);
-        #else
-            float amplitude = adsrCalculateLinear(adsr);
-        #endif
-        float outputVal = tableLinInterp(carrier->table, perturbed);
-        output[i] = outputVal * amplitude;
-
-        // increase accumulators
-        oscIncreasePhase(carrier);
-        oscIncreasePhase(modulator);
-    }
-}
+Voice voices[2] = {};
 
 void printPoints(float* values, size_t length) {
     printf("i = [");
@@ -74,36 +35,40 @@ void printPoints(float* values, size_t length) {
     printf("]\n");
 }
 
+void initEverything() {
+    oscInit(&o1C, sinePtr, 4096, 440.0f, 1, 44100.0f);
+    oscInit(&o1M, trianglePtr, 4096, 880.0f, 0.5f, 44100.0f);
+    oscInit(&o2C, sinePtr, 4096, 392.9f, 1, 44100.0f);
+    oscInit(&o2M, sinePtr, 4096, 784.0f, 15.0f, 44100.0f);
+
+    initADSR(&a1, MS_TO_S(600), MS_TO_S(250), MS_TO_S(25), 0.5, 44100.0f);
+    initADSR(&a2, MS_TO_S(500), MS_TO_S(250), MS_TO_S(25), 0.5, 44100.0f);
+    initVoice(&voices[0], &o1C, &o1M, &a1, ob1, 88200);
+    initVoice(&voices[1], &o2C, &o2M, &a2, ob2, 88200);
+
+    voiceModulate(&voices[0], 80000);
+    voiceModulate(&voices[1], 75000);
+}
+
 int main(int argc, char const *argv[])
 {
-    float* sinePtr = malloc(sizeof(float) * WT_SIZE);
-    float* trianglePtr = malloc(sizeof(float) * WT_SIZE);
-    float* modulatedWavePtr = malloc(sizeof(float) * 88200);
+    sinePtr = malloc(sizeof(float) * WT_SIZE);
+    trianglePtr = malloc(sizeof(float) * WT_SIZE);
+    ob1 = malloc(sizeof(float) * 88200);
+    ob2 = malloc(sizeof(float) * 88200);
+    float* obFinal = malloc(sizeof(float) * 88200);
 
     wtSine(sinePtr, WT_SIZE);
     wtTriangle(trianglePtr, WT_SIZE);
+    initEverything();
 
-    Oscillator mainOscilator;
-    oscInit(&mainOscilator, sinePtr, 4096, 261.63f, 1, 44100.0f);
-
-    Oscillator modulatorOscillator;
-    oscInit(&modulatorOscillator, trianglePtr, 4096, 392.445f, 0.5f, 44100.0f);
-
-    ADSR adsr; 
-    bool adsrValid = initADSR(&adsr, MS_TO_S(50.0f), MS_TO_S(100.0f), MS_TO_S(50.0f), 0.25f, 44100);
-    if (!adsrValid) {
-        return -1;
-    }
-
-    wtFmModulate(modulatedWavePtr, 88200, &mainOscilator, &modulatorOscillator, &adsr);
-    
-//    printPoints(modulatedWavePtr, 4096);
-    printPoints(trianglePtr, 4096);
-    printPoints(sinePtr, 4096);
-    writeWavF32("demo-f32.wav", modulatedWavePtr, 88200, 44100);
+    mix(voices, 2, obFinal, 88200);
+    writeWavF32("demo-f32.wav", obFinal, 88200, 44100);
 
     free(sinePtr);
-    free(modulatedWavePtr);
+    free(obFinal);
+    free(ob1);
+    free(ob2);
     free(trianglePtr);
     return 0;
 }

@@ -34,8 +34,8 @@ include_directories(${INCLUDE_DIRS})
 option(USE_FIXED_POINT "Use fixed point mathematics" OFF)
 option(EXPONENTIAL_ADSR "Use exponential/log adsr calculations" ON)
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
-        src/synth/mixer.cpp
-        src/synth/voice.cpp)
+        src/synth/mixer.c
+        src/synth/voice.c)
 
 if (USE_FIXED_POINT)
     set(MAIN_FILE src/main-fixed.c)
