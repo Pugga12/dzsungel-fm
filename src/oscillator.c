@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include "fix16.h"
-#include "oscillator.h"
+#include "dsp/oscillator.h"
 
 void oscIncreasePhase(Oscillator* oscillator) {
     oscillator->phase += oscillator->phaseIncrement;

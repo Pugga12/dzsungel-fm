@@ -2,8 +2,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "oscillator.h"
-#include "wav.h"
+#include "dsp/oscillator.h"
+#include "../include/phase-mod-demo/io/wav.h"
 #include "fix16.h"
 #include "constants.h"
 

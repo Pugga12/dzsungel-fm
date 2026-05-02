@@ -2,12 +2,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "adsr.h"
-#include "oscillator.h"
-#include "wav.h"
+#include "dsp/adsr.h"
+#include "dsp/oscillator.h"
+#include "io/wav.h"
 #include "constants.h"
 #include <assert.h>
-#include "wavetablegen.h"
+#include "dsp/wavetablegen.h"
 #include <stdbool.h>
 
 #define MS_TO_S(ms) (ms / 1000.0f)

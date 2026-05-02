@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "wav.h"
+#include "io/wav.h"
 #include <stdbool.h>
 
 bool writeWavS16(char *name, int16_t *data, size_t frameCount, uint32_t sampleRate) {

@@ -1,7 +1,7 @@
 //
 // Created by adama on 5/1/26.
 //
-#include "wavetablegen.h"
+#include "dsp/wavetablegen.h"
 
 #include <assert.h>
 #include <stdint.h>
