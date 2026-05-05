@@ -37,7 +37,7 @@ typedef struct
  * @param decaySeconds Decay time, in seconds (must be >= 0)
  * @param sustainLevel The sustain amplitude, from 0.0 to 1.0
  * @param sampleRate Sample rate of the audio, in Hz. A typical value is 44100 Hz
- * @return true if successfully created, false if parameters are invalid
+ * @returns true if successfully created, false if parameters are invalid
  */
 bool initADSR(ADSR* ptr, float attackSeconds, float releaseSeconds, float decaySeconds, float sustainLevel, uint32_t sampleRate);
 
@@ -50,7 +50,7 @@ void reset(ADSR* ptr);
  * @par This must be called once per sample calculated
  *
  * @param ptr Pointer to ADSR struct
- * @return ADSR amplitude, from 0.0 to 1.0
+ * @returns ADSR amplitude, from 0.0 to 1.0
  */
 float adsrCalculateLinear(ADSR* ptr);
 
@@ -61,6 +61,6 @@ void setGate(ADSR* adsr, bool gate);
  * Calculates the current ADSR with a logarthmic curve for ATTACK and exponential for DECAY/RELEASE
  *
  * @param adsr Pointer to ADSR struct
- * @return ADSR amplitude, from 0.0 to 1.0
+ * @returns ADSR amplitude, from 0.0 to 1.0
  */
 float adsrCalculateExp(ADSR* adsr);

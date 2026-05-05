@@ -10,19 +10,19 @@
 #define MS_TO_S(ms) (ms / 1000.0f)
 
 
-Oscillator o1C;
-Oscillator o1M;
-Oscillator o2C;
-Oscillator o2M;
-ADSR a1;
-ADSR a2;
+static Oscillator o1C;
+static Oscillator o1M;
+static Oscillator o2C;
+static Oscillator o2M;
+static ADSR a1;
+static ADSR a2;
 
-float* ob1;
-float* ob2;
-float* sinePtr;
-float* trianglePtr;
+static float* ob1;
+static float* ob2;
+static float* sinePtr;
+static float* trianglePtr;
 
-Voice voices[2] = {};
+static Voice voices[2] = {};
 
 void printPoints(float* values, size_t length) {
     printf("i = [");
@@ -36,12 +36,12 @@ void printPoints(float* values, size_t length) {
 }
 
 void initEverything() {
-    oscInit(&o1C, sinePtr, WT_SIZE, 440.0f, 1, 44100.0f);
-    oscInit(&o1M, trianglePtr, WT_SIZE, 880.0f, 0.5f, 44100.0f);
-    oscInit(&o2C, sinePtr, WT_SIZE, 392.9f, 1, 44100.0f);
-    oscInit(&o2M, sinePtr, WT_SIZE, 784.0f, 15.0f, 44100.0f);
+    oscInit(&o1C, trianglePtr, WT_SIZE, 32.7f, 1, 44100.0f);
+    oscInit(&o1M, sinePtr, WT_SIZE, 49.05f, 2.0f, 44100.0f);
+    oscInit(&o2C, sinePtr, WT_SIZE, 261.63f, 1, 44100.0f);
+    oscInit(&o2M, sinePtr, WT_SIZE, 523.26f, 2.0f, 44100.0f);
 
-    initADSR(&a1, MS_TO_S(600), MS_TO_S(250), MS_TO_S(25), 0.5, 44100.0f);
+    initADSR(&a1, MS_TO_S(500), MS_TO_S(250), MS_TO_S(25), 0.5, 44100.0f);
     initADSR(&a2, MS_TO_S(500), MS_TO_S(250), MS_TO_S(25), 0.5, 44100.0f);
     initVoice(&voices[0], &o1C, &o1M, &a1, ob1, 88200);
     initVoice(&voices[1], &o2C, &o2M, &a2, ob2, 88200);

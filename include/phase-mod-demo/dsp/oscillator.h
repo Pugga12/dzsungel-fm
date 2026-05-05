@@ -28,13 +28,13 @@ void oscIncreasePhase(Oscillator* oscillator);
  * @par This function uses the floating point variant of Oscillator
  *
  * @param osc Pointer to oscillator struct
- * @param Pointer to the wavetable to use
+ * @param table Pointer to the wavetable to use
  * @param tableLen Length of the wavetable
  * @param freq Frequency of the oscillator
- * @param mod_Index Modulator index/depth when using this oscillator as a modulator
+ * @param modIndex Modulator index/depth when using this oscillator as a modulator
  * @param sampleRate The rate at which this oscillator will be sampled at. Typical is 44100 Hz. Used to calculate oscillator phase increment.
  */
-void oscInit(Oscillator* osc, float *table, size_t tableLen, float freq, float mod_index, float sample_rate);
+void oscInit(Oscillator* osc, float *table, size_t tableLen, float freq, float modIndex, float sampleRate);
 
 typedef struct
 {

@@ -26,6 +26,9 @@ target_compile_definitions(libfixmath PRIVATE
     # FIXMATH_OPTIMIZE_8BIT
 )
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Include paths
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/phase-mod-demo)
 
@@ -35,7 +38,8 @@ option(USE_FIXED_POINT "Use fixed point mathematics" OFF)
 option(EXPONENTIAL_ADSR "Use exponential/log adsr calculations" ON)
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
         src/synth/mixer.c
-        src/synth/voice.c)
+        src/synth/voice.c
+        src/dsp/noise.cpp)
 
 if (USE_FIXED_POINT)
     set(MAIN_FILE src/main-fixed.c)

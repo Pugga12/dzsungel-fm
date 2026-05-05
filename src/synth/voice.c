@@ -6,6 +6,7 @@
 #include <assert.h>
 #include "constants.h"
 #include "math.h"
+#include "dsp/wavetablegen.h"
 
 bool initVoice(Voice *v, Oscillator* carrier, Oscillator* modulator, ADSR* adsr, float* outBuffer, size_t bufferSize) {
     if (!v || !carrier || !modulator || !adsr || !outBuffer || bufferSize == 0) {
@@ -26,23 +27,30 @@ bool initVoice(Voice *v, Oscillator* carrier, Oscillator* modulator, ADSR* adsr,
 float tableLinInterp(float* wtPtr, float x) {
     int i = (int)x;
     float a1 = wtPtr[i];
-    float a2 = wtPtr[i + 1];
+    float a2 = wtPtr[(i + 1) % WT_SIZE];
     float decimal = x - (float)i;
     return a1 + decimal * (a2 - a1);
 }
 
+static float bitCrush(const float x, const uint8_t precision) {
+    const float max = (float)(1 << precision) - 1;
+    const float max2 = max / 2;
+
+    int quantitized = (int)roundf((x + 1) * max2);
+    return (((float)quantitized / max) * 2) - 1;
+}
 
 void voiceModulate(Voice* v, uint64_t releaseAt) {
     setGate(v->adsr, true);
+    const float scalingConstant = v->modulator->tableLen / (1.0f * M_PI);
+    const float deviationMultiplier = v->modulator->modIndex * scalingConstant;
 
     for (int i = 0; i < v->bufferSize; i++) {
-        float modVal = tableLinInterp(v->modulator->table, v->modulator->phase);
-
-        float scalingConstant = v->modulator->tableLen / (2.0f * M_PI);
-        float phaseDeviation = v->modulator->modIndex * modVal * scalingConstant;
+        const float modVal = v->modulator->table[(int)v->modulator->phase];
+        const float qModVal = bitCrush(modVal, 8);
 
         // modulate the carrier by adding the phase deviation to the accumulator value
-        float perturbed = v->carrier->phase + phaseDeviation;
+        float perturbed = v->carrier->phase + (qModVal * deviationMultiplier);
 
         if (i == releaseAt) {
             setGate(v->adsr, false);
@@ -53,12 +61,12 @@ void voiceModulate(Voice* v, uint64_t releaseAt) {
         while (perturbed < 0) perturbed += v->carrier->tableLen;
 
 #ifdef EXPONENTIAL_ADSR
-        float amplitude = adsrCalculateExp(v->adsr);
+        const float amplitude = adsrCalculateExp(v->adsr);
 #else
-        float amplitude = adsrCalculateLinear(adsr);
+        const float amplitude = adsrCalculateLinear(v->adsr);
 #endif
-        float outputVal = tableLinInterp(v->carrier->table, perturbed);
-        v->outBuffer[i] = outputVal * amplitude;
+        const float qPerturbation = bitCrush(perturbed, 8);
+        v->outBuffer[i] = v->carrier->table[(int)qPerturbation] * amplitude;
 
         // increase accumulators
         oscIncreasePhase(v->carrier);
