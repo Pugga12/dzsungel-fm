@@ -30,11 +30,13 @@ void SynthVoice::noteOn(uint32_t midiNote) {
 	reset(&modEnv);
 	setGate(&ampEnv, true);
 	setGate(&modEnv, true);
+	state = VOICE_ACTIVE;
 }
 
 void SynthVoice::noteOff() {
 	setGate(&ampEnv, false);
 	setGate(&modEnv, false);
+	state = VOICE_RELEASING;
 }
 
 static float bitCrush(const float x, const uint8_t precision) {
@@ -46,12 +48,21 @@ static float bitCrush(const float x, const uint8_t precision) {
 }
 
 void SynthVoice::renderInner(uint32_t start, uint32_t end, float* outputBuffer) {
+	if (end - start <= 0) {
+		return;
+	}
+
 	const float len = static_cast<float>(carrier.tableLen);
 	const float scalingConstant = static_cast<float>(modulator.tableLen) / 8;
 
 	for (uint32_t i = start; i < end; i++) {
 		const float ampEnvVal = adsrCalculateExp(&ampEnv);
 		const float modEnvVal = adsrCalculateExp(&modEnv);
+
+		if (ampEnv.state == IDLE) {
+			state = VOICE_IDLE;
+			break;
+		}
 
 		const float modVal = modulator.table[static_cast<int>(modulator.phase)];
 
@@ -94,7 +105,10 @@ void SynthVoice::processBlock(float* outputBuffer, size_t blockSize) {
 	eventIndex = 0;
 }
 
-void SynthVoice::queueBlockEvents(VoiceEvent *arr, size_t n) {
-	events.assign(arr, arr+n);
-	eventIndex = 0;
+void SynthVoice::pushEv(VoiceEvent& ev) {
+  if (ev.type == NOTE_ON && state == VOICE_IDLE) {
+    state = VOICE_WAIT;
+  }
+
+  events.push_back(ev);
 }

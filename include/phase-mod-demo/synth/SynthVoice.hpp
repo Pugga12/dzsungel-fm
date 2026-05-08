@@ -58,7 +58,7 @@ class SynthVoice {
         void noteOn(uint32_t midiNote);
         void noteOff();
         void processBlock(float* outputBuffer, size_t blockSize);
-        void queueBlockEvents(VoiceEvent* arr, size_t n);
+        void pushEv(VoiceEvent& ev);
         void init(Program* program, float* modTable, float* carrierTable, float sr, size_t tableSize);
         
         VoiceState getState() {

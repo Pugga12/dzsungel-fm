@@ -13,13 +13,16 @@ struct TimedEvent {
 };
 
 class VoiceManager {
+private:
 	std::vector<VoiceEvent> events;
 	std::array<SynthVoice, 8> voices;
 
-	uint32_t currentBlock = 0;
-	uint32_t evCursor = 0;
-
+	uint32_t maxBlock = 0;
+	float sr;
+public:
 	VoiceManager(std::vector<TimedEvent> *timedEvents,float* modTable,float* carrierTable, float sr, size_t tableSize);
+
+	bool go(float* outputBuffer, size_t outputSize);
 };
 
 
