@@ -26,7 +26,7 @@ target_compile_definitions(libfixmath PRIVATE
     # FIXMATH_OPTIMIZE_8BIT
 )
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include paths
@@ -34,18 +34,17 @@ set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/phase-mod-demo)
 
 # Assign the include directories
 include_directories(${INCLUDE_DIRS})
-option(USE_FIXED_POINT "Use fixed point mathematics" OFF)
 option(EXPONENTIAL_ADSR "Use exponential/log adsr calculations" ON)
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
         src/synth/mixer.c
         src/synth/voice.c
-        src/dsp/noise.cpp)
+        src/dsp/noise.cpp
+        src/synth/SynthVoice.cpp
+        src/synth/VoiceManager.cpp
+        src/dsp/wavetablegen.c
+)
 
-if (USE_FIXED_POINT)
-    set(MAIN_FILE src/main-fixed.c)
-else ()
-    set(MAIN_FILE src/main-fpu.c src/dsp/wavetablegen.c)
-endif ()
+set(MAIN_FILE src/new-main.cpp)
 add_executable(phase-mod-demo ${COMMON_SOURCES} ${MAIN_FILE})
 target_link_libraries(${PROJECT_NAME} PRIVATE m libfixmath)
 target_include_directories(phase-mod-demo PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath)
