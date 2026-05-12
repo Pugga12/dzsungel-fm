@@ -15,4 +15,4 @@
  * @see writeWavF32() IEEE Float version of this function
  */
 bool writeWavS16(char *name, int16_t *data, size_t frameCount, uint32_t sampleRate);
-bool writeWavF32(char *name, float *data, size_t frameCount, uint32_t sampleRate);
+bool writeWavF32(const char *name, float *data, size_t frameCount, uint32_t sampleRate);

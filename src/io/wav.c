@@ -48,7 +48,7 @@ bool writeWavS16(char *name, int16_t *data, size_t frameCount, uint32_t sampleRa
     return true;
 }
 
-bool writeWavF32(char *name, float *data, size_t frameCount, uint32_t sampleRate) {
+bool writeWavF32(const char* name, float *data, size_t frameCount, uint32_t sampleRate) {
     uint32_t duration = frameCount / sampleRate;
     uint16_t chanNumber = 1;
     uint16_t bits = 32;

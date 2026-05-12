@@ -8,29 +8,6 @@ extern "C" {
     #include "io/wav.h"
 }
 
-std::vector<TimedEvent> create_voice_ladder_test() {
-    std::vector<TimedEvent> events;
-
-    // We will add 1 voice every 0.5 seconds (22050 samples)
-    for (uint8_t v = 0; v < 8; ++v) {
-        uint32_t startTime = v * 22050; 
-        
-        // We use a "Major 9th" chord spread so the frequencies are distinct
-        // but close enough to rub together in the tanhf mixer.
-        uint8_t pitches[] = {48, 52, 55, 59, 60, 64, 67, 71}; 
-        
-        events.push_back({v, startTime, NOTE_ON, pitches[v]});
-    }
-
-    for (int v = 0; v < 8; v++) {
-        uint32_t endTime = 190000 + (v * 22050);
-
-        events.push_back({v, endTime, NOTE_OFF, 0});
-    }
-
-    return events;
-}
-
 int main(int argc, char** argv) {
     smf::Options options;
     options.process(argc, argv);
@@ -50,8 +27,13 @@ int main(int argc, char** argv) {
         std::printf("Invalid output size");
         return -1;
     }
-    char* str = "new.wav";
-    writeWavF32(str, outputPtr, 10584000, 44100);
+    if (options.getArgCount() == 2) {
+        auto& filename = options.getArg(2);
+        writeWavF32(filename.data(), outputPtr, 10584000, 44100);
+    } else {
+        char* defaultString = "out.wav";
+        writeWavF32(defaultString, outputPtr, 10584000, 44100);
+    }
 
 
 	free(sinePtr);
