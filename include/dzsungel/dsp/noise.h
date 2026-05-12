@@ -16,16 +16,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
-#include "dsp/noise.h"
-#include <random>
+#pragma once
 
+#define GAUSSIAN_MEAN 0
+#define GAUSSIAN_STDDEV 1
 
+#ifdef __cplusplus
 extern "C" {
-    float gaussianRandom() {
-        static std::random_device rd;
-        static std::mt19937 generator(rd());
-        static std::normal_distribution<float> dist(GAUSSIAN_MEAN, GAUSSIAN_STDDEV);
+#endif
 
-        return dist(generator);
-    }
+    float gaussianRandom();
+#ifdef __cplusplus
 }
+#endif

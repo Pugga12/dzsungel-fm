@@ -16,16 +16,31 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
-#include "dsp/noise.h"
-#include <random>
+#pragma once
+#include "synth/SynthVoice.hpp"
+#include <array>
+
+struct TimedEvent {
+	uint8_t voiceId;
+	uint32_t timecode;
+	EventType type;
+	uint32_t value;
+};
+
+class VoiceManager {
+private:
+	std::vector<VoiceEvent> events;
+	std::array<SynthVoice, 24> voices;
+
+	uint32_t maxBlock = 0;
+	uint32_t maxEventTimecode = 0;
+	float sr;
+
+	void initPrintDbg();
+public:
+	VoiceManager(std::vector<TimedEvent>& timedEvents,float* modTable,float* carrierTable, float sr, size_t tableSize);
+
+	bool go(float* outputBuffer, size_t outputSize);
+};
 
 
-extern "C" {
-    float gaussianRandom() {
-        static std::random_device rd;
-        static std::mt19937 generator(rd());
-        static std::normal_distribution<float> dist(GAUSSIAN_MEAN, GAUSSIAN_STDDEV);
-
-        return dist(generator);
-    }
-}

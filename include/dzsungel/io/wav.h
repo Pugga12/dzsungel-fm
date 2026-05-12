@@ -16,16 +16,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
-#include "dsp/noise.h"
-#include <random>
+#pragma once
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#define WAV_FORMAT_PCM 1
+#define WAV_FORMAT_IEEE_FLOAT 3
 
-
-extern "C" {
-    float gaussianRandom() {
-        static std::random_device rd;
-        static std::mt19937 generator(rd());
-        static std::normal_distribution<float> dist(GAUSSIAN_MEAN, GAUSSIAN_STDDEV);
-
-        return dist(generator);
-    }
-}
+/**
+ * Generate a WAV file in the Signed 16-bit PCM format
+ *
+ * @param name Filename
+ * @param data Pointer to samples
+ * @param frameCount Number of samples in the input buffer
+ * @param sampleRate Sample rate in Hz (typical is 44000 Hz)
+ * @see writeWavF32() IEEE Float version of this function
+ */
+bool writeWavS16(char *name, int16_t *data, size_t frameCount, uint32_t sampleRate);
+bool writeWavF32(const char *name, float *data, size_t frameCount, uint32_t sampleRate);

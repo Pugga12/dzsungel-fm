@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
 # Definitions
-set(PROJECT_NAME phase-mod-demo)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 
 #project(cmake_c_template)
-project(${PROJECT_NAME})
+project(dzsungel VERSION 1.0)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
 include(FetchContent)
@@ -30,7 +29,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Include paths
-set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/phase-mod-demo)
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include/dzsungel)
 
 # Assign the include directories
 include_directories(${INCLUDE_DIRS})
@@ -54,9 +53,9 @@ set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
 )
 
 set(MAIN_FILE src/new-main.cpp)
-add_executable(phase-mod-demo ${COMMON_SOURCES} ${MAIN_FILE} ${MIDIFILE_SOURCES})
-target_link_libraries(${PROJECT_NAME} PRIVATE m libfixmath)
-target_include_directories(phase-mod-demo PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath include/midifile)
+add_executable(dzsungel ${COMMON_SOURCES} ${MAIN_FILE} ${MIDIFILE_SOURCES})
+target_link_libraries(dzsungel PRIVATE m libfixmath)
+target_include_directories(dzsungel PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath include/midifile)
 if(EXPONENTIAL_ADSR)
-    target_compile_definitions(phase-mod-demo PRIVATE EXPONENTIAL_ADSR)
+    target_compile_definitions(dzsungel PRIVATE EXPONENTIAL_ADSR)
 endif ()
