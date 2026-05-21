@@ -63,6 +63,7 @@ struct VoiceEvent {
 
     uint8_t offset;
     uint32_t val;
+    uint32_t p2;
 };
 
 class SynthVoice {
@@ -73,6 +74,7 @@ class SynthVoice {
         Oscillator modulator;
         ADSR ampEnv;
         ADSR modEnv;
+        Program* defaultProgram;
 
         uint32_t currentMidiNote = 0;
         uint8_t eventIndex = 0;
@@ -89,18 +91,17 @@ class SynthVoice {
 
         float expresssion = 1.0f;
         float masterVolume = 1.0f;
-        
         float lastOutput = 0;
 
         void renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer);
         void renderInnerFeedback(uint32_t start, uint32_t end, float* output);
         void setMidiBend(uint32_t bVal);
     public:
-        void noteOn(uint32_t midiNote);
+        void noteOn(uint32_t midiNote, uint32_t velocity);
         void noteOff();
         void processBlock(float* outputBuffer, size_t blockSize);
         void pushEv(VoiceEvent& ev);
-        void init(Program* program, float* modTable, float* carrierTable, float sr, size_t tableSize);
+        void init(Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize);
         
         VoiceState getState() {
             return state;

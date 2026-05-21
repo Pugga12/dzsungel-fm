@@ -30,17 +30,18 @@ static float noteToFrequency(uint32_t note) {
 	return 440.0f * std::exp2((note - 69.0f) / 12.0f);
 }
 
-void SynthVoice::init(Program *program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
+void SynthVoice::init(Program &program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
 	oscInit(&carrier, carrierTable, tableSize, 55.0f, 1, sr);
-	oscInit(&modulator, modTable, tableSize, 82.5f, program->modIndex, sr);
+	oscInit(&modulator, modTable, tableSize, 82.5f, program.modIndex, sr);
 
-	envStructToAdsr(&ampEnv, &program->ampEnv, sr);
-	envStructToAdsr(&modEnv, &program->ampEnv, sr);
-	cToMRatio = program->cToMRatio;
-	type = program->type;
+	envStructToAdsr(&ampEnv, &program.ampEnv, sr);
+	envStructToAdsr(&modEnv, &program.ampEnv, sr);
+	cToMRatio = program.cToMRatio;
+	type = program.type;
+	defaultProgram = &program;
 }
 
-void SynthVoice::noteOn(uint32_t midiNote) {
+void SynthVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
 	this->currentMidiNote = midiNote;
 	baseCarrier = noteToFrequency(midiNote);
 	currentCarrierFrequency = baseCarrier;

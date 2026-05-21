@@ -53,7 +53,7 @@ VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable
     events.reserve(timedEvents.size());
 
     for (auto& v : voices) {
-        v.init(&PRG_DEFAULT_BASS, modTable, carrierTable, sr, tableSize);
+        v.init(PRG_DEFAULT_BASS, modTable, carrierTable, sr, tableSize);
     }
 
     uint32_t maxBlock = 0;
