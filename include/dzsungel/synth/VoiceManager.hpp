@@ -19,6 +19,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #pragma once
 #include "synth/SynthVoice.hpp"
 #include <array>
+#include "types.hpp"
 
 struct TimedEvent {
 	uint8_t voiceId;

@@ -22,6 +22,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include <vector>
 #include "synth/VoiceManager.hpp"
 #include "synth/SynthVoice.hpp"
+#include "types.hpp"
 
 constinit Program PRG_DEFAULT_BASS {
     2,

@@ -18,6 +18,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
 #include <vector>
+#include "types.hpp"
 
 extern "C" {
 #include "dsp/oscillator.h"
@@ -29,41 +30,6 @@ enum VoiceState {
     VOICE_WAIT,
     VOICE_ACTIVE,
     VOICE_RELEASING,
-};
-
-enum EventType {
-    // CC event (0 - 127)
-    CC7_VOLUME = 7,
-    CC11_EXPRESSION = 11,
-
-    // other events (>127)
-    NOTE_ON = 128,
-    NOTE_OFF = 129,
-    PROGRAM_CHANGE = 130,
-    PITCH_BEND = 131,
-};
-
-enum OscillatorType {
-    STANDARD_PM,
-    FEEDBACK
-};
-
-struct Program {
-    float modIndex;
-    float cToMRatio;
-    Envelope ampEnv;
-    Envelope modEnv;
-    OscillatorType type;
-};
-
-struct VoiceEvent {
-    uint32_t blockId;
-    uint8_t voiceId;
-    EventType type;
-
-    uint8_t offset;
-    uint32_t val;
-    uint32_t p2;
 };
 
 class SynthVoice {
