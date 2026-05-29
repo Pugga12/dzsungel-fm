@@ -56,6 +56,7 @@ void SynthVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
 	setGate(&ampEnv, true);
 	setGate(&modEnv, true);
 	state = VOICE_ACTIVE;
+	lpFilter.reset();
 }
 
 void SynthVoice::noteOff() {
@@ -114,7 +115,8 @@ void SynthVoice::renderInnerNormal(uint32_t start, uint32_t end, float* outputBu
 		perturbed -= len * (float)((int)(perturbed * invLen));
 		const float vol = ampEnvVal *  expresssion * masterVolume;
 
-		outputBuffer[i] += carrier.table[static_cast<int>(perturbed)] * vol;
+		float x = carrier.table[static_cast<int>(perturbed)] * vol;
+		outputBuffer[i] += lpFilter.filter(x);
 
 		oscIncreasePhase(&carrier);
 		oscIncreasePhase(&modulator);
@@ -158,11 +160,12 @@ void SynthVoice::renderInnerFeedback(uint32_t start, uint32_t end, float* output
 		if (perturbed < 0) perturbed += len;
 		perturbed -= len * (float)((int)(perturbed * invLen));
 
-		float currentSample = carrier.table[static_cast<int>(perturbed)];
+		float x = carrier.table[static_cast<int>(perturbed)];
 		const float vol = ampEnvVal *  expresssion * masterVolume;
-		lastOutput = currentSample;
+		const float filteredValue = lpFilter.filter(x);
+		lastOutput = filteredValue;
+		outputBuffer[i] += filteredValue * vol;
 
-		outputBuffer[i] += carrier.table[static_cast<int>(perturbed)] * vol;
 		oscIncreasePhase(&carrier);
 	}
 }

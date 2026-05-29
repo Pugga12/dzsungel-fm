@@ -17,7 +17,9 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
+#include <iir/Butterworth.h>
 #include <vector>
+#include "Iir.h"
 
 extern "C" {
 #include "dsp/oscillator.h"
@@ -93,6 +95,8 @@ class SynthVoice {
         float masterVolume = 1.0f;
         float lastOutput = 0;
 
+        Iir::Butterworth::LowPass<2> lpFilter;
+
         void renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer);
         void renderInnerFeedback(uint32_t start, uint32_t end, float* output);
         void setMidiBend(uint32_t bVal);
@@ -122,6 +126,7 @@ class SynthVoice {
             type(STANDARD_PM)
         {
             events.reserve(8);
+            lpFilter.setup(44100.0, 8000.0);
         }
 };
 

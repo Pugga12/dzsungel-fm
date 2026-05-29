@@ -15,6 +15,8 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libfixmath)
 
+find_package(iir)
+
 target_compile_definitions(libfixmath PRIVATE
     # FIXMATH_FAST_SIN
     # FIXMATH_NO_64BIT
@@ -54,7 +56,7 @@ set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
 
 set(MAIN_FILE src/new-main.cpp)
 add_executable(dzsungel ${COMMON_SOURCES} ${MAIN_FILE} ${MIDIFILE_SOURCES})
-target_link_libraries(dzsungel PRIVATE m libfixmath)
+target_link_libraries(dzsungel PRIVATE m libfixmath iir::iir)
 target_include_directories(dzsungel PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath include/midifile)
 if(EXPONENTIAL_ADSR)
     target_compile_definitions(dzsungel PRIVATE EXPONENTIAL_ADSR)
