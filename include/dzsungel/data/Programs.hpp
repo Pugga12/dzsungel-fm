@@ -35,8 +35,8 @@ static Program DEFAULT_PROGRAM {
     },
     {
         MS_TO_S(10),
-        MS_TO_S(50),
-        0.1,
+        MS_TO_S(200),
+        0.5,
         MS_TO_S(500)
     },
     FEEDBACK
@@ -46,14 +46,14 @@ class ProgramManager {
     static const std::map<uint8_t, Program> DEFAULT_PROGRAM_LIBRARY;
 
     public:
-    static const Program& getProgram(uint8_t id) {
+    static const Program* getProgram(uint8_t id) {
         std::map<uint8_t, Program>::const_iterator iter = DEFAULT_PROGRAM_LIBRARY.find(id);
 
         if (iter != DEFAULT_PROGRAM_LIBRARY.end()) {
-            return iter->second;
+            return &iter->second;
         }
         
-        return DEFAULT_PROGRAM;
+        return nullptr;
     }
 
     static bool hasPreset(uint8_t id) {
@@ -63,5 +63,9 @@ class ProgramManager {
     static std::vector<uint8_t> availablePresets() {
         auto keys = std::views::keys(DEFAULT_PROGRAM_LIBRARY);
         return std::vector<uint8_t>(keys.begin(), keys.end());
+    }
+
+    static size_t getNumDefaultPrograms() {
+        return DEFAULT_PROGRAM_LIBRARY.size();
     }
 };

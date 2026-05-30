@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
+#include <cstdint>
 #include <vector>
 #include "types.hpp"
 
@@ -59,9 +60,12 @@ class SynthVoice {
         float masterVolume = 1.0f;
         float lastOutput = 0;
 
+        uint8_t currentProgramId = 255;
+
         void renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer);
         void renderInnerFeedback(uint32_t start, uint32_t end, float* output);
         void setMidiBend(uint32_t bVal);
+        void changeProgram(uint32_t prgId);
     public:
         void noteOn(uint32_t midiNote, uint32_t velocity);
         void noteOff();

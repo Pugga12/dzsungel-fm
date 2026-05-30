@@ -18,3 +18,6 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 
 #include "data/Programs.hpp"
+#include "types.hpp"
+
+const std::map<uint8_t, Program> ProgramManager::DEFAULT_PROGRAM_LIBRARY = {};

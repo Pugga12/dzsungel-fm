@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
+#include "MidiEvent.h"
 #include "synth/SynthVoice.hpp"
 #include "synth/VoiceManager.hpp"
 #include "MidiFile.h"
@@ -38,6 +39,7 @@ struct ChannelState {
     uint8_t expression = 127;
     uint8_t volume = 127;
     uint8_t pan = 64;
+    uint8_t programId = 0;
 };
 
 class MidiProcessor {
@@ -61,7 +63,9 @@ class MidiProcessor {
     void processNoteEvent(MidiEvent& stEv, MidiEvent* endEv);
     void processPitchBend(MidiEvent& ev);
     void processCc(MidiEvent& ev);
+    void processProgramChange(MidiEvent& ev);
     void generateVoiceSetupEvents(uint8_t voice, uint32_t channel, uint32_t timecode);
+    std::vector<uint8_t>& getRosterAndClearOld(uint32_t channel, uint32_t currentTc);
     public:
     bool load(const std::string& filename);
     void convert();

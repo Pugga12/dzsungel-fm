@@ -18,8 +18,12 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include "synth/SynthVoice.hpp"
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include "constants.h"
+#include "data/Programs.hpp"
+#include "types.hpp"
+#include <stdexcept>
 
 extern "C" {
 #include "dsp/adsr.h"
@@ -35,7 +39,7 @@ void SynthVoice::init(Program &program, float *modTable, float *carrierTable, fl
 	oscInit(&modulator, modTable, tableSize, 82.5f, program.modIndex, sr);
 
 	envStructToAdsr(&ampEnv, &program.ampEnv, sr);
-	envStructToAdsr(&modEnv, &program.ampEnv, sr);
+	envStructToAdsr(&modEnv, &program.modEnv, sr);
 	cToMRatio = program.cToMRatio;
 	type = program.type;
 	defaultProgram = &program;
@@ -181,16 +185,34 @@ void SynthVoice::processBlock(float* outputBuffer, size_t blockSize) {
 
 		cursor = ev.offset;
 
-		if (ev.type == EventType::NOTE_ON) {
-			noteOn(ev.val, 0);
-		} else if (ev.type == EventType::NOTE_OFF){
-			noteOff();
-		} else if (ev.type == EventType::PITCH_BEND) {
-			setMidiBend(ev.val);
-		} else if (ev.type == EventType::CC11_EXPRESSION) {
-			expresssion = ev.val / 127.0f;
-		} else if (ev.type == CC7_VOLUME) {
-			masterVolume = ev.val / 127.0f;
+		switch (ev.type) {
+			case NOTE_ON: {
+				noteOn(ev.val, 0);
+				break;
+			}
+			case NOTE_OFF: {
+				noteOff();
+				break;
+			}
+			case PITCH_BEND: {
+				setMidiBend(ev.val);
+				break;
+			}
+			case CC11_EXPRESSION: {
+				expresssion = ev.val / 127.0f;
+				break;
+			}
+			case CC7_VOLUME: {
+				masterVolume = ev.val / 127.0f;
+				break;
+			}
+			case PROGRAM_CHANGE: {
+				changeProgram(ev.val);
+				break;
+			}
+			default:
+				throw std::runtime_error("Invalid event type recieved");
+				break;
 		}
 
 		eventIndex++;
@@ -222,4 +244,13 @@ void SynthVoice::setMidiBend(uint32_t bVal) {
 
 	rampSamplesRemaining = 32;
 	rampInc = (targetCarrierFrequency - currentCarrierFrequency) / 32;
+}
+
+void SynthVoice::changeProgram(uint32_t prgId) {
+	static size_t prgTableSize = ProgramManager::getNumDefaultPrograms();
+	if (prgTableSize == 0) return;
+	if (prgId == currentProgramId) return;
+	
+	auto* prg = ProgramManager::getProgram(prgId);
+
 }

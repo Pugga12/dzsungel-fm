@@ -18,11 +18,13 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include "MidiFile.h"
 #include "MidiEvent.h"
-#include "synth/SynthVoice.hpp"
 #include "synth/VoiceManager.hpp"
 #include <algorithm>
 #include "synth/MidiPreprocessor.hpp"
+#include <cstdint>
 #include <iostream>
+#include <vector>
+#include "types.hpp"
 using namespace smf;
 
 bool MidiProcessor::load(const std::string& filename)
@@ -63,6 +65,8 @@ void MidiProcessor::convert()
             processPitchBend(ev);
         } else if (ev.isController()) {
             processCc(ev);
+        } else if (ev.isPatchChange()) {
+            processProgramChange(ev);
         }
     }
 
@@ -194,12 +198,8 @@ void MidiProcessor::processPitchBend(MidiEvent& ev) {
     uint32_t currentTc = static_cast<uint32_t>(ev.seconds * 44100.0);
     uint32_t channel = static_cast<uint32_t>(ev.getChannel());
     uint32_t bend = (static_cast<uint32_t>(ev.getP2() << 7) | static_cast<uint32_t>(ev.getP1()));
-
-    auto& roster = channelRosters[channel];
-
-    roster.erase(std::remove_if(roster.begin(), roster.end(), [&](uint8_t v) {
-        return voices.at(v).endTime < currentTc;
-    }), roster.end());
+        
+    std::vector<uint8_t>& roster = getRosterAndClearOld(channel, currentTc);
 
     for (uint8_t voiceId : roster) {
         processedEvents.push_back({
@@ -224,12 +224,7 @@ void MidiProcessor::processCc(MidiEvent& ev) {
     uint32_t channel = static_cast<uint32_t>(ev.getChannel());
     uint32_t value = static_cast<uint32_t>(ev.getP2());
 
-    auto& roster = channelRosters[channel];
-
-    roster.erase(std::remove_if(roster.begin(), roster.end(), [&](uint8_t v) {
-        return voices.at(v).endTime < currentTc;
-    }), roster.end());
-
+    std::vector<uint8_t>& roster = getRosterAndClearOld(channel, currentTc);
 
     switch (ccNo) {
         case 7: {
@@ -266,6 +261,26 @@ void MidiProcessor::processCc(MidiEvent& ev) {
         }
         default: 
             break;
+    }
+}
+
+void MidiProcessor::processProgramChange(MidiEvent& ev) {
+    uint32_t currentTc = static_cast<uint32_t>(ev.seconds * 44100.0f);
+    uint32_t channel = static_cast<uint32_t>(ev.getChannel());
+    uint8_t value = static_cast<uint8_t>(ev.getP1());
+    
+    std::vector<uint8_t>& roster = getRosterAndClearOld(channel, currentTc);
+    channelStates[channel].programId = value;
+
+    for (uint8_t voiceId : roster) {
+        processedEvents.push_back({
+            voiceId,
+            currentTc,
+            PROGRAM_CHANGE,
+            value
+        });
+        
+        lastChannelStateUpdate[voiceId].programId = value;
     }
 }
 
@@ -308,5 +323,31 @@ void MidiProcessor::generateVoiceSetupEvents(uint8_t voice, uint32_t channel, ui
             CC7_VOLUME,
             currentVol
         });
+
+        syncEvents++;
     }
+
+    if (lastChannelStateUpdate[voice].programId != channelStates[channel].programId) {
+        uint8_t currentProgram = channelStates[channel].programId;
+        lastChannelStateUpdate[voice].programId = currentProgram;
+
+        processedEvents.push_back({
+            voice,
+            timecode,
+            PROGRAM_CHANGE,
+            currentProgram
+        });
+
+        syncEvents++;
+    }
+}
+
+std::vector<uint8_t>& MidiProcessor::getRosterAndClearOld(uint32_t channel, uint32_t currentTc) {
+    auto& roster = channelRosters[channel];
+
+    roster.erase(std::remove_if(roster.begin(), roster.end(), [&](uint8_t v) {
+        return voices.at(v).endTime < currentTc;
+    }), roster.end());
+
+    return roster;
 }
