@@ -23,24 +23,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include "synth/VoiceManager.hpp"
 #include "synth/SynthVoice.hpp"
 #include "types.hpp"
-
-constinit Program PRG_DEFAULT_BASS {
-    2,
-    0.0001,
-    {
-        MS_TO_S(10),
-        MS_TO_S(400),
-        0.5,
-        MS_TO_S(500)
-    },
-    {
-        MS_TO_S(10),
-        MS_TO_S(50),
-        0.1,
-        MS_TO_S(500)
-    },
-    FEEDBACK
-};
+#include "data/Programs.hpp"
 
 void VoiceManager::initPrintDbg() {
     std::printf("=== Voice Manager Debug ===\n");
@@ -54,7 +37,7 @@ VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable
     events.reserve(timedEvents.size());
 
     for (auto& v : voices) {
-        v.init(PRG_DEFAULT_BASS, modTable, carrierTable, sr, tableSize);
+        v.init(DEFAULT_PROGRAM, modTable, carrierTable, sr, tableSize);
     }
 
     uint32_t maxBlock = 0;

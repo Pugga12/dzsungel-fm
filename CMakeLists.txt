@@ -51,6 +51,7 @@ set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
         src/dsp/wavetablegen.c
         src/synth/MidiPreprocessor.cpp
         include/dzsungel/types.hpp
+        src/data/Programs.cpp
 )
 
 set(MAIN_FILE src/new-main.cpp)
