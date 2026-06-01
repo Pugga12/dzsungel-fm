@@ -18,6 +18,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include "synth/VoiceManager.hpp"
@@ -92,6 +93,7 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
     for (uint32_t i = 0; i < fullBlocks; i++) {
         bSt = outputBuffer + (64 * i); 
+        std::cout << "Block " << i << "\n";
 
         while (currentEvent < events.size() && events[currentEvent].blockId == i) {
             VoiceEvent& ev = events[currentEvent];

@@ -4,8 +4,8 @@
         {
             "name": "default-preset",
             "displayName": "Default Config",
-            "binaryDir": "${sourceDir}/build",
             "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
                 "MAX_VOICES": "256"

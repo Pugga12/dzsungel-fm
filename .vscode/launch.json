@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${workspaceRoot}/bin/dzsungel",
             "args": [
-                "${userHome}/midi/The Final Countdown - Europe.mid",
+                "${userHome}/midi/monty-2.mid",
                 "dbg.wav"
             ],
             "stopAtEntry": false,

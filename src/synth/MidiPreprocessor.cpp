@@ -119,17 +119,15 @@ uint8_t MidiProcessor::assignNoteToVoice(uint32_t startTime, uint32_t endTime, u
     }
 
     uint8_t newVoice = 0;
-    try {
-        newVoice = availableVoices.at(0);
+    if (availableVoices.size() != 0) {
+        newVoice = availableVoices[0];
         availableVoices.erase(availableVoices.begin());
-    } catch (const std::out_of_range& e) {
-        std::cerr << "Ran out of voices while trying to assign to channel " << channel << ". Please increase the MAX_VOICES option." << "\n";
+    } else {
         if (channelRosters[channel].size() == 0) {
             std::string msg = "Attempted to reassign a voice on channel " + std::to_string(channel) + " but no candidates were found.";
             throw std::runtime_error(msg);
         }
         return stealVoiceInChannel(startTime, endTime, pitch, channel);
-        
     }
 
     cVec.push_back(newVoice);

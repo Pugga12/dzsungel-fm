@@ -20,4 +20,25 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include "data/Programs.hpp"
 #include "types.hpp"
 
-const std::map<uint8_t, Program> ProgramManager::DEFAULT_PROGRAM_LIBRARY = {};
+const std::map<uint8_t, Program> ProgramManager::DEFAULT_PROGRAM_LIBRARY = {
+    {
+        48,
+        {
+            12,
+            0.0001,
+            {
+                MS_TO_S(10),
+                MS_TO_S(400),
+                0.5,
+                MS_TO_S(500)
+            },
+            {
+                MS_TO_S(10),
+                MS_TO_S(200),
+                0.5,
+                MS_TO_S(500)
+            },
+            STANDARD_PM
+        }
+    }
+};
