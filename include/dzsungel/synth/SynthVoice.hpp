@@ -41,13 +41,13 @@ class SynthVoice {
         Oscillator modulator;
         ADSR ampEnv;
         ADSR modEnv;
-        Program* defaultProgram;
 
         uint32_t currentMidiNote = 0;
         uint8_t eventIndex = 0;
         VoiceState state = VOICE_IDLE;
         float sampleRate;
         float cToMRatio;
+        float voiceSr = 44100.0f;
         
         float pitchBendRange = 2.0f;
         float baseCarrier = 0.0f;
@@ -71,7 +71,7 @@ class SynthVoice {
         void noteOff();
         void processBlock(float* outputBuffer, size_t blockSize);
         void pushEv(VoiceEvent& ev);
-        void init(Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize);
+        void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize);
         
         VoiceState getState() {
             return state;

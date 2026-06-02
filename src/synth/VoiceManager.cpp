@@ -18,6 +18,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include "synth/VoiceManager.hpp"
@@ -104,7 +105,7 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
          for (auto& v : voices) {
             if (v.getState() != VOICE_IDLE) {
-                 v.processBlock(bSt, 64);
+                v.processBlock(bSt, 64);
             }
         }
     }

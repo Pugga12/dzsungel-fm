@@ -34,7 +34,7 @@ static float noteToFrequency(uint32_t note) {
 	return 440.0f * std::exp2((note - 69.0f) / 12.0f);
 }
 
-void SynthVoice::init(Program &program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
+void SynthVoice::init(const Program &program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
 	oscInit(&carrier, carrierTable, tableSize, 55.0f, 1, sr);
 	oscInit(&modulator, modTable, tableSize, 82.5f, program.modIndex, sr);
 
@@ -42,7 +42,7 @@ void SynthVoice::init(Program &program, float *modTable, float *carrierTable, fl
 	envStructToAdsr(&modEnv, &program.modEnv, sr);
 	cToMRatio = program.cToMRatio;
 	type = program.type;
-	defaultProgram = &program;
+	voiceSr = sr;
 }
 
 void SynthVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
@@ -252,5 +252,13 @@ void SynthVoice::changeProgram(uint32_t prgId) {
 	if (prgId == currentProgramId) return;
 	
 	auto* prg = ProgramManager::getProgram(prgId);
-
+	
+	if (prg == nullptr) return;
+	envStructToAdsr(&ampEnv, &prg->ampEnv, voiceSr);
+	envStructToAdsr(&modEnv, &prg->modEnv, voiceSr);
+	type = prg->type;
+	cToMRatio = prg->cToMRatio;
+	modulator.modIndex = prg->modIndex;
+	currentProgramId = prgId;
+	oscUpdateFrequency(&modulator, currentCarrierFrequency * cToMRatio);
 }
