@@ -25,8 +25,8 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include <ranges>
 
 static Program DEFAULT_PROGRAM {
-    2,
-    0.0001,
+    1.5,
+    2.5,
     {
         MS_TO_S(10),
         MS_TO_S(400),

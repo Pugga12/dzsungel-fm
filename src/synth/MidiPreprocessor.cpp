@@ -172,6 +172,10 @@ uint8_t MidiProcessor::stealVoiceInChannel(uint32_t startTime, uint32_t endTime,
     return victim;
 }
 
+static bool voiceIsActiveAt(PreprocessorVoiceState& v, uint32_t timecode) {
+    return timecode >= v.startTime && timecode <= v.endTime;
+}
+
 void MidiProcessor::printPreprocessorStats()
 {
     std::cout << "=== MIDI File " << filename << " Preprocessing ===" << "\n";
@@ -216,6 +220,8 @@ void MidiProcessor::processPitchBend(MidiEvent& ev) {
     std::vector<uint8_t>& roster = channelRosters[channel];
 
     for (uint8_t voiceId : roster) {
+        if (!voiceIsActiveAt(voices[voiceId], currentTc)) continue;
+
         processedEvents.push_back({
             voiceId,
             currentTc,
@@ -245,6 +251,7 @@ void MidiProcessor::processCc(MidiEvent& ev) {
             channelStates[channel].volume = value;
 
             for (uint8_t voiceId : roster) {
+                if (!voiceIsActiveAt(voices[voiceId], currentTc)) continue;
                 processedEvents.push_back({
                     voiceId,
                     currentTc,
@@ -261,6 +268,7 @@ void MidiProcessor::processCc(MidiEvent& ev) {
             channelStates[channel].expression = value;
 
             for (uint8_t voiceId : roster) {
+                if (!voiceIsActiveAt(voices[voiceId], currentTc)) continue;
                 processedEvents.push_back({
                     voiceId,
                     currentTc,
@@ -287,6 +295,7 @@ void MidiProcessor::processProgramChange(MidiEvent& ev) {
     channelStates[channel].programId = value;
 
     for (uint8_t voiceId : roster) {
+        if (!voiceIsActiveAt(voices[voiceId], currentTc)) continue;
         processedEvents.push_back({
             voiceId,
             currentTc,

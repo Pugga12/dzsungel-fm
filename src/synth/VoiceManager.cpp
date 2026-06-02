@@ -93,7 +93,6 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
     for (uint32_t i = 0; i < fullBlocks; i++) {
         bSt = outputBuffer + (64 * i); 
-        std::cout << "Block " << i << "\n";
 
         while (currentEvent < events.size() && events[currentEvent].blockId == i) {
             VoiceEvent& ev = events[currentEvent];
@@ -106,7 +105,7 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
          for (auto& v : voices) {
             if (v.getState() != VOICE_IDLE) {
-                 v.processBlock(bSt, 64);
+                v.processBlock(bSt, 64);
             }
         }
     }
