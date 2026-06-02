@@ -7,24 +7,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 project(dzsungel VERSION 1.0)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99")
 
-include(FetchContent)
-FetchContent_Declare(
-    libfixmath
-    GIT_REPOSITORY https://github.com/PetteriAimonen/libfixmath.git
-    GIT_TAG 9318ccd9428114d318eb8703a7e40c152b9059c7
-)
-FetchContent_MakeAvailable(libfixmath)
-
-target_compile_definitions(libfixmath PRIVATE
-    # FIXMATH_FAST_SIN
-    # FIXMATH_NO_64BIT
-    # FIXMATH_NO_CACHE
-    # FIXMATH_NO_HARD_DIVISION
-    # FIXMATH_NO_OVERFLOW
-    FIXMATH_NO_ROUNDING
-    # FIXMATH_OPTIMIZE_8BIT
-)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -45,7 +27,6 @@ set(MIDIFILE_SOURCES
 )
 
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
-        src/dsp/noise.cpp
         src/synth/SynthVoice.cpp
         src/synth/VoiceManager.cpp
         src/dsp/wavetablegen.c
@@ -58,8 +39,8 @@ set(MAX_VOICES 32 CACHE STRING "Max voice polyphony")
 
 set(MAIN_FILE src/new-main.cpp)
 add_executable(dzsungel ${COMMON_SOURCES} ${MAIN_FILE} ${MIDIFILE_SOURCES})
-target_link_libraries(dzsungel PRIVATE m libfixmath)
-target_include_directories(dzsungel PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath include/midifile)
+target_link_libraries(dzsungel PRIVATE m)
+target_include_directories(dzsungel PRIVATE include/midifile)
 if(EXPONENTIAL_ADSR)
     target_compile_definitions(dzsungel PRIVATE EXPONENTIAL_ADSR)
 endif ()
