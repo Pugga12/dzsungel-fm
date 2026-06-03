@@ -2,12 +2,32 @@
     "version": 3,
     "configurePresets": [
         {
-            "name": "default-preset",
-            "displayName": "Default Config",
+            "name": "debug",
+            "displayName": "Debug",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build",
+            "binaryDir": "${sourceDir}/build-debug",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
+                "MAX_VOICES": "256"
+            }
+        },
+        {
+            "name": "RelWithDbg",
+            "displayName": "Release with Debug Info",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build-debug",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+                "MAX_VOICES": "256"
+            }
+        },
+        {
+            "name": "release",
+            "displayName": "Release",
+            "binaryDir": "${sourceDir}/build-release",
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
                 "MAX_VOICES": "256"
             }
         }

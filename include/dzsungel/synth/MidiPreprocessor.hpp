@@ -18,7 +18,6 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
 #include "MidiEvent.h"
-#include "synth/SynthVoice.hpp"
 #include "synth/VoiceManager.hpp"
 #include "MidiFile.h"
 #include <cstdint>

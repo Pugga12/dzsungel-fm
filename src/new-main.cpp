@@ -18,10 +18,10 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <cstdlib>
 #include <iostream>
-#include <memory>
 #include "synth/VoiceManager.hpp"
 #include "synth/MidiPreprocessor.hpp"
 #include "Options.h"
+#include "synth/Voices.hpp"
 
 extern "C" {
 	#include "dsp/wavetablegen.h"
@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<float> output(outputSize);
-	VoiceManager vm(extractedTimeline, sineTbl.data(), sineTbl.data(), SAMPLE_RATE_F, WAVETABLE_SIZE);
+	VoiceManager<WavetableVoice> vm(extractedTimeline, sineTbl.data(), sineTbl.data(), SAMPLE_RATE_F, WAVETABLE_SIZE);
 
 	if (!vm.go(output.data(), outputSize)) {
         std::printf("Invalid output size");

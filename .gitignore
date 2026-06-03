@@ -11,3 +11,4 @@ cmake-build-debug/
 out/
 compile_commands.json
 .vscode/
+build-*/

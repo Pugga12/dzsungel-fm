@@ -22,11 +22,13 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include <cmath>
 #include <vector>
 #include "synth/VoiceManager.hpp"
-#include "synth/SynthVoice.hpp"
+#include "synth/Voices.hpp"
 #include "types.hpp"
 #include "data/Programs.hpp"
 
-void VoiceManager::initPrintDbg() {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+void VoiceManager<VoiceType>::initPrintDbg() {
     std::printf("=== Voice Manager Debug ===\n");
     std::printf("Events Processed: %lu\n", events.size());
     std::printf("Max Event Timecode: %u\n", maxEventTimecode);
@@ -34,7 +36,9 @@ void VoiceManager::initPrintDbg() {
     std::printf("Fractional Blocks / Full Blocks / Remainder Block Size: %f, %u, %u\n", maxEventTimecode / 64.0f, maxEventTimecode / 64, maxEventTimecode % 64);
 }
 
-VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable, float* carrierTable, float sr, size_t tableSize) : sr(sr) {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+VoiceManager<VoiceType>::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable, float* carrierTable, float sr, size_t tableSize) : sr(sr) {
     events.reserve(timedEvents.size());
 
     for (auto& v : voices) {
@@ -80,7 +84,9 @@ VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable
     initPrintDbg();
 }
 
-bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+bool VoiceManager<VoiceType>::go(float* outputBuffer, size_t outputSize) {
     uint32_t remBlockSize = outputSize % 64;
 
     if (maxEventTimecode > outputSize) {
@@ -135,3 +141,5 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
     return true;
 }
+
+template class VoiceManager<WavetableVoice>;

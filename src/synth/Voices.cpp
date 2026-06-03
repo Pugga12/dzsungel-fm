@@ -16,7 +16,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
-#include "synth/SynthVoice.hpp"
+#include "synth/Voices.hpp"
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -34,7 +34,7 @@ static float noteToFrequency(uint32_t note) {
 	return 440.0f * std::exp2((note - 69.0f) / 12.0f);
 }
 
-void SynthVoice::init(const Program &program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
+void WavetableVoice::init(const Program &program, float *modTable, float *carrierTable, float sr, size_t tableSize) {
 	oscInit(&carrier, carrierTable, tableSize, 55.0f, 1, sr);
 	oscInit(&modulator, modTable, tableSize, 82.5f, program.modIndex, sr);
 
@@ -45,7 +45,7 @@ void SynthVoice::init(const Program &program, float *modTable, float *carrierTab
 	voiceSr = sr;
 }
 
-void SynthVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
+void WavetableVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
 	this->currentMidiNote = midiNote;
 	baseCarrier = noteToFrequency(midiNote);
 	currentCarrierFrequency = baseCarrier;
@@ -62,7 +62,7 @@ void SynthVoice::noteOn(uint32_t midiNote, uint32_t velocity) {
 	state = VOICE_ACTIVE;
 }
 
-void SynthVoice::noteOff() {
+void WavetableVoice::noteOff() {
 	setGate(&ampEnv, false);
 	setGate(&modEnv, false);
 	state = VOICE_RELEASING;
@@ -76,7 +76,7 @@ static float bitCrush(const float x, const uint8_t precision) {
 	return (((float)quantitized / max) * 2) - 1;
 }
 
-void SynthVoice::renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer) {
+void WavetableVoice::renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer) {
 	if (end - start <= 0) {
 		return;
 	}
@@ -125,7 +125,7 @@ void SynthVoice::renderInnerNormal(uint32_t start, uint32_t end, float* outputBu
 	}	
 }
 
-void SynthVoice::renderInnerFeedback(uint32_t start, uint32_t end, float* outputBuffer) {
+void WavetableVoice::renderInnerFeedback(uint32_t start, uint32_t end, float* outputBuffer) {
 	if (end - start <= 0) {
 		return;
 	}
@@ -171,7 +171,7 @@ void SynthVoice::renderInnerFeedback(uint32_t start, uint32_t end, float* output
 	}
 }
 
-void SynthVoice::processBlock(float* outputBuffer, size_t blockSize) {
+void WavetableVoice::processBlock(float* outputBuffer, size_t blockSize) {
 	if (state == VOICE_IDLE) return;
 	uint32_t cursor = 0;
 
@@ -227,7 +227,7 @@ void SynthVoice::processBlock(float* outputBuffer, size_t blockSize) {
 	eventIndex = 0;
 }
 
-void SynthVoice::pushEv(VoiceEvent& ev) {
+void WavetableVoice::pushEv(VoiceEvent& ev) {
   if (ev.type == NOTE_ON && state == VOICE_IDLE) {
     state = VOICE_WAIT;
   }
@@ -235,7 +235,7 @@ void SynthVoice::pushEv(VoiceEvent& ev) {
   events.push_back(ev);
 }
 
-void SynthVoice::setMidiBend(uint32_t bVal) {
+void WavetableVoice::setMidiBend(uint32_t bVal) {
 	const float normalizedBend = (static_cast<float>(bVal) - 8192.0f) / 8192.0f;
 	const float pitchBendSemitones = normalizedBend * pitchBendRange;
 
@@ -246,7 +246,7 @@ void SynthVoice::setMidiBend(uint32_t bVal) {
 	rampInc = (targetCarrierFrequency - currentCarrierFrequency) / 32;
 }
 
-void SynthVoice::changeProgram(uint32_t prgId) {
+void WavetableVoice::changeProgram(uint32_t prgId) {
 	static size_t prgTableSize = ProgramManager::getNumDefaultPrograms();
 	if (prgTableSize == 0) return;
 	if (prgId == currentProgramId) return;

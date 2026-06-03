@@ -27,7 +27,7 @@ set(MIDIFILE_SOURCES
 )
 
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
-        src/synth/SynthVoice.cpp
+        src/synth/Voices.cpp
         src/synth/VoiceManager.cpp
         src/dsp/wavetablegen.c
         src/synth/MidiPreprocessor.cpp

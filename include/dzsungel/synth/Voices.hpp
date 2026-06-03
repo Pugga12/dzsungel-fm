@@ -33,7 +33,18 @@ enum VoiceState {
     VOICE_RELEASING,
 };
 
-class SynthVoice {
+class Voice {
+    public:
+    virtual ~Voice() = default;
+    virtual void processBlock(float* output, size_t blockSize) = 0;
+    virtual void pushEv(VoiceEvent& ev) = 0;
+    virtual void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize) = 0;
+
+    virtual VoiceState getState() const = 0;
+    virtual uint32_t getNote() const = 0;
+};
+
+class WavetableVoice : public Voice{
     private:
         std::vector<VoiceEvent> events;
         OscillatorType type;
@@ -62,27 +73,27 @@ class SynthVoice {
 
         uint8_t currentProgramId = 255;
 
+        void noteOn(uint32_t midiNote, uint32_t velocity);
+        void noteOff();
         void renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer);
         void renderInnerFeedback(uint32_t start, uint32_t end, float* output);
         void setMidiBend(uint32_t bVal);
         void changeProgram(uint32_t prgId);
     public:
-        void noteOn(uint32_t midiNote, uint32_t velocity);
-        void noteOff();
-        void processBlock(float* outputBuffer, size_t blockSize);
-        void pushEv(VoiceEvent& ev);
-        void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize);
+        void processBlock(float* outputBuffer, size_t blockSize) override;
+        void pushEv(VoiceEvent& ev) override;
+        void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize) override;
         
-        VoiceState getState() {
+        VoiceState getState() const override {
             return state;
         }
 
-        uint32_t getNote() {
+        uint32_t getNote() const override {
             return currentMidiNote;
         }
 
         // default constructor, to make the VoiceManager init straight-forward
-        SynthVoice() :
+        WavetableVoice() :
             carrier{},
             modulator{},
             ampEnv{},
