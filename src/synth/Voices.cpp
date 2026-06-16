@@ -113,8 +113,7 @@ void WavetableVoice::renderInnerNormal(uint32_t start, uint32_t end, float* outp
 		const float currentModDepth = (modulator.modIndex * scalingConstant) * modEnvVal;
 
 		float perturbed = carrier.phase + (modVal * currentModDepth);
-		if (perturbed < 0) perturbed += len;
-
+		while (perturbed < 0) perturbed += len;
 		perturbed -= len * (float)((int)(perturbed * invLen));
 		const float vol = ampEnvVal *  expresssion * masterVolume;
 

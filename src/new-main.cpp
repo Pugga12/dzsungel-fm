@@ -22,6 +22,7 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 #include "synth/MidiPreprocessor.hpp"
 #include "Options.h"
 #include "synth/Voices.hpp"
+#include "DrWavImpl.hpp"
 
 extern "C" {
 	#include "dsp/wavetablegen.h"
@@ -63,10 +64,10 @@ int main(int argc, char** argv) {
 
     if (options.getArgCount() == 2) {
         auto& filename = options.getArg(2);
-        writeWavF32(filename.c_str(), output.data(), outputSize, SAMPLE_RATE);
+        DrWavImpl::writeWav(output, 44100, filename);
     } else {
         const std::string defaultName = "out.wav";
-        writeWavF32(defaultName.c_str(), output.data(), outputSize, SAMPLE_RATE);
+        DrWavImpl::writeWav(output, 44100, defaultName);
     }
 
 	return 0;
