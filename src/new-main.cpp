@@ -26,7 +26,6 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 
 extern "C" {
 	#include "dsp/wavetablegen.h"
-    #include "io/wav.h"
 }
 
 constexpr size_t WAVETABLE_SIZE = 4096;

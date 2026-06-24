@@ -15,7 +15,7 @@ include_directories(${PROJECT_SOURCE_DIR}/include/dzsungel)
 add_subdirectory(libs)
 option(EXPONENTIAL_ADSR "Use exponential/log adsr calculations" ON)
 
-set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
+set(COMMON_SOURCES src/dsp/adsr.c src/dsp/oscillator.c
         src/synth/Voices.cpp
         src/synth/VoiceManager.cpp
         src/dsp/wavetablegen.c
