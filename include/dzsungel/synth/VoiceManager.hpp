@@ -17,8 +17,9 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
-#include "synth/SynthVoice.hpp"
+#include "synth/Voices.hpp"
 #include <array>
+#include "types.hpp"
 
 struct TimedEvent {
 	uint8_t voiceId;
@@ -27,10 +28,12 @@ struct TimedEvent {
 	uint32_t value;
 };
 
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
 class VoiceManager {
 private:
 	std::vector<VoiceEvent> events;
-	std::array<SynthVoice, 24> voices;
+	std::array<WavetableVoice, MAX_VOICES> voices;
 
 	uint32_t maxBlock = 0;
 	uint32_t maxEventTimecode = 0;

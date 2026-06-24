@@ -68,7 +68,7 @@ typedef struct {
  */
 bool initADSR(ADSR* ptr, float attackSeconds, float releaseSeconds, float decaySeconds, float sustainLevel, uint32_t sampleRate);
 
-bool envStructToAdsr(ADSR* ptr, Envelope* env, float sampleRate);
+bool envStructToAdsr(ADSR* ptr, const Envelope* env, float sampleRate);
 
 /// Resets the ADSR state machine
 void reset(ADSR* ptr);

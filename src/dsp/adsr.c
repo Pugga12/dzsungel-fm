@@ -67,7 +67,7 @@ bool initADSR(ADSR* ptr, float attackSeconds, float releaseSeconds, float decayS
     return true;
 }
 
-bool envStructToAdsr(ADSR* ptr, Envelope* env, float sampleRate) {
+bool envStructToAdsr(ADSR* ptr, const Envelope* env, float sampleRate) {
     return initADSR(ptr, env->attackTime, env->releaseTime, env->decayTime, env->sustainLevel, (uint32_t)sampleRate);
 }
 

@@ -17,7 +17,9 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
+#include <cstdint>
 #include <vector>
+#include "types.hpp"
 
 extern "C" {
 #include "dsp/oscillator.h"
@@ -31,42 +33,18 @@ enum VoiceState {
     VOICE_RELEASING,
 };
 
-enum EventType {
-    // CC event (0 - 127)
-    CC7_VOLUME = 7,
-    CC11_EXPRESSION = 11,
+class Voice {
+    public:
+    virtual ~Voice() = default;
+    virtual void processBlock(float* output, size_t blockSize) = 0;
+    virtual void pushEv(VoiceEvent& ev) = 0;
+    virtual void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize) = 0;
 
-    // other events (>127)
-    NOTE_ON = 128,
-    NOTE_OFF = 129,
-    PROGRAM_CHANGE = 130,
-    PITCH_BEND = 131,
+    virtual VoiceState getState() const = 0;
+    virtual uint32_t getNote() const = 0;
 };
 
-enum OscillatorType {
-    STANDARD_PM,
-    FEEDBACK
-};
-
-struct Program {
-    float modIndex;
-    float cToMRatio;
-    Envelope ampEnv;
-    Envelope modEnv;
-    OscillatorType type;
-};
-
-struct VoiceEvent {
-    uint32_t blockId;
-    uint8_t voiceId;
-    EventType type;
-
-    uint8_t offset;
-    uint32_t val;
-    uint32_t p2;
-};
-
-class SynthVoice {
+class WavetableVoice : public Voice{
     private:
         std::vector<VoiceEvent> events;
         OscillatorType type;
@@ -74,13 +52,13 @@ class SynthVoice {
         Oscillator modulator;
         ADSR ampEnv;
         ADSR modEnv;
-        Program* defaultProgram;
 
         uint32_t currentMidiNote = 0;
         uint8_t eventIndex = 0;
         VoiceState state = VOICE_IDLE;
         float sampleRate;
         float cToMRatio;
+        float voiceSr = 44100.0f;
         
         float pitchBendRange = 2.0f;
         float baseCarrier = 0.0f;
@@ -93,26 +71,29 @@ class SynthVoice {
         float masterVolume = 1.0f;
         float lastOutput = 0;
 
+        uint8_t currentProgramId = 255;
+
+        void noteOn(uint32_t midiNote, uint32_t velocity);
+        void noteOff();
         void renderInnerNormal(uint32_t start, uint32_t end, float* outputBuffer);
         void renderInnerFeedback(uint32_t start, uint32_t end, float* output);
         void setMidiBend(uint32_t bVal);
+        void changeProgram(uint32_t prgId);
     public:
-        void noteOn(uint32_t midiNote, uint32_t velocity);
-        void noteOff();
-        void processBlock(float* outputBuffer, size_t blockSize);
-        void pushEv(VoiceEvent& ev);
-        void init(Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize);
+        void processBlock(float* outputBuffer, size_t blockSize) override;
+        void pushEv(VoiceEvent& ev) override;
+        void init(const Program& program, float* modTable, float* carrierTable, float sr, size_t tableSize) override;
         
-        VoiceState getState() {
+        VoiceState getState() const override {
             return state;
         }
 
-        uint32_t getNote() {
+        uint32_t getNote() const override {
             return currentMidiNote;
         }
 
         // default constructor, to make the VoiceManager init straight-forward
-        SynthVoice() :
+        WavetableVoice() :
             carrier{},
             modulator{},
             ampEnv{},

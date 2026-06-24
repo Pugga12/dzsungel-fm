@@ -54,18 +54,25 @@ set(MIDIFILE_SOURCES
 )
 
 set(COMMON_SOURCES src/io/wav.c src/dsp/adsr.c src/dsp/oscillator.c
-        src/dsp/noise.cpp
-        src/synth/SynthVoice.cpp
+        src/synth/Voices.cpp
         src/synth/VoiceManager.cpp
         src/dsp/wavetablegen.c
         src/synth/MidiPreprocessor.cpp
+        include/dzsungel/types.hpp
+        src/data/Programs.cpp
 )
+
+set(MAX_VOICES 32 CACHE STRING "Max voice polyphony")
 
 set(MAIN_FILE src/new-main.cpp)
 add_executable(dzsungel ${COMMON_SOURCES} ${MAIN_FILE} ${MIDIFILE_SOURCES})
 target_include_directories(dzsungel PUBLIC ${SimplePA_SOURCE_DIR})
-target_link_libraries(dzsungel PRIVATE m libfixmath SimplePA)
-target_include_directories(dzsungel PRIVATE ${libfixmath_SOURCE_DIR}/libfixmath include/midifile)
+target_link_libraries(dzsungel PRIVATE m SimplePA)
+target_include_directories(dzsungel PRIVATE include/midifile)
 if(EXPONENTIAL_ADSR)
     target_compile_definitions(dzsungel PRIVATE EXPONENTIAL_ADSR)
 endif ()
+target_compile_definitions(
+    dzsungel
+    PRIVATE MAX_VOICES=${MAX_VOICES}
+)

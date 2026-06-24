@@ -18,30 +18,17 @@ along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <algorithm>
 #include <cstdio>
+#include <iostream>
 #include <cmath>
 #include <vector>
 #include "synth/VoiceManager.hpp"
-#include "synth/SynthVoice.hpp"
+#include "synth/Voices.hpp"
+#include "types.hpp"
+#include "data/Programs.hpp"
 
-constinit Program PRG_DEFAULT_BASS {
-    2,
-    0.0001,
-    {
-        MS_TO_S(10),
-        MS_TO_S(400),
-        0.5,
-        MS_TO_S(500)
-    },
-    {
-        MS_TO_S(10),
-        MS_TO_S(50),
-        0.1,
-        MS_TO_S(500)
-    },
-    FEEDBACK
-};
-
-void VoiceManager::initPrintDbg() {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+void VoiceManager<VoiceType>::initPrintDbg() {
     std::printf("=== Voice Manager Debug ===\n");
     std::printf("Events Processed: %lu\n", events.size());
     std::printf("Max Event Timecode: %u\n", maxEventTimecode);
@@ -49,11 +36,13 @@ void VoiceManager::initPrintDbg() {
     std::printf("Fractional Blocks / Full Blocks / Remainder Block Size: %f, %u, %u\n", maxEventTimecode / 64.0f, maxEventTimecode / 64, maxEventTimecode % 64);
 }
 
-VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable, float* carrierTable, float sr, size_t tableSize) : sr(sr) {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+VoiceManager<VoiceType>::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable, float* carrierTable, float sr, size_t tableSize) : sr(sr) {
     events.reserve(timedEvents.size());
 
     for (auto& v : voices) {
-        v.init(PRG_DEFAULT_BASS, modTable, carrierTable, sr, tableSize);
+        v.init(DEFAULT_PROGRAM, modTable, carrierTable, sr, tableSize);
     }
 
     uint32_t maxBlock = 0;
@@ -95,7 +84,9 @@ VoiceManager::VoiceManager(std::vector<TimedEvent>& timedEvents, float* modTable
     initPrintDbg();
 }
 
-bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
+template<typename VoiceType>
+requires std::derived_from<VoiceType, Voice>
+bool VoiceManager<VoiceType>::go(float* outputBuffer, size_t outputSize) {
     uint32_t remBlockSize = outputSize % 64;
 
     if (maxEventTimecode > outputSize) {
@@ -120,7 +111,7 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
 
          for (auto& v : voices) {
             if (v.getState() != VOICE_IDLE) {
-                 v.processBlock(bSt, 64);
+                v.processBlock(bSt, 64);
             }
         }
     }
@@ -145,8 +136,10 @@ bool VoiceManager::go(float* outputBuffer, size_t outputSize) {
     }
 
     for (int i = 0; i < outputSize; i++) {
-        outputBuffer[i] = std::tanh(outputBuffer[i] * 0.5f);
+        outputBuffer[i] = std::tanh(outputBuffer[i] * 0.1f);
     }
 
     return true;
 }
+
+template class VoiceManager<WavetableVoice>;

@@ -17,10 +17,12 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <cstdlib>
+#include <iostream>
 #include <pulse/sample.h>
 #include "synth/VoiceManager.hpp"
 #include "synth/MidiPreprocessor.hpp"
 #include "Options.h"
+#include "synth/Voices.hpp"
 #include "SimplePA.hpp"
 
 extern "C" {
@@ -34,6 +36,7 @@ constexpr float SAMPLE_RATE_F = static_cast<float>(SAMPLE_RATE);
 using namespace YukiWorkshop;
 
 int main(int argc, char** argv) {
+    std::cout << "Voices Configured: " << MAX_VOICES << "\n";
     smf::Options options;
     options.process(argc, argv);
 	std::vector<float> sineTbl(WAVETABLE_SIZE);
@@ -54,7 +57,7 @@ int main(int argc, char** argv) {
     }
 
     std::vector<float> output(outputSize);
-	VoiceManager vm(extractedTimeline, sineTbl.data(), sineTbl.data(), SAMPLE_RATE_F, WAVETABLE_SIZE);
+	VoiceManager<WavetableVoice> vm(extractedTimeline, sineTbl.data(), sineTbl.data(), SAMPLE_RATE_F, WAVETABLE_SIZE);
 
 	if (!vm.go(output.data(), outputSize)) {
         std::printf("Invalid output size");

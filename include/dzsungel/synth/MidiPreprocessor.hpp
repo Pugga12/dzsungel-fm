@@ -17,12 +17,13 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #pragma once
-#include "synth/SynthVoice.hpp"
+#include "MidiEvent.h"
 #include "synth/VoiceManager.hpp"
 #include "MidiFile.h"
 #include <cstdint>
 #include <vector>
 #include <array>
+#include <numeric>
 using namespace smf;
 
 struct PreprocessorVoiceState {
@@ -38,14 +39,16 @@ struct ChannelState {
     uint8_t expression = 127;
     uint8_t volume = 127;
     uint8_t pan = 64;
+    uint8_t programId = 0;
 };
 
 class MidiProcessor {
     private:
     std::vector<TimedEvent> processedEvents;
-    std::array<PreprocessorVoiceState, 24> voices;
+    std::array<PreprocessorVoiceState, MAX_VOICES> voices;
     std::array<ChannelState, 16> channelStates;
-    std::array<ChannelState, 24> lastChannelStateUpdate;
+    std::vector<uint8_t> availableVoices;
+    std::array<ChannelState, MAX_VOICES> lastChannelStateUpdate;
     MidiFile midiData;
     size_t noteEvents = 0;
     size_t bendEvents = 0;
@@ -56,16 +59,22 @@ class MidiProcessor {
     size_t finalTc;
 
     uint8_t assignNoteToVoice(uint32_t startTime, uint32_t endTime, uint32_t pitch, uint32_t channel);
-    void removeVoiceFromRosters(uint8_t voice);
     void printPreprocessorStats();
     void processNoteEvent(MidiEvent& stEv, MidiEvent* endEv);
     void processPitchBend(MidiEvent& ev);
     void processCc(MidiEvent& ev);
+    void processProgramChange(MidiEvent& ev);
     void generateVoiceSetupEvents(uint8_t voice, uint32_t channel, uint32_t timecode);
+    uint8_t stealVoiceInChannel(uint32_t startTime, uint32_t endTime, uint32_t pitch, uint32_t channel);
     public:
     bool load(const std::string& filename);
     void convert();
     std::vector<TimedEvent>& getEvents();
+
+    MidiProcessor() {
+        availableVoices.resize(MAX_VOICES);
+        std::iota(availableVoices.begin(), availableVoices.end(), 0);
+    }
 
     size_t getFinalTc() {
         return finalTc;
