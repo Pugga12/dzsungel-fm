@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
 //    }
 
     SimplePA::Player pa("Dzsungel", "Synth Output", {PA_SAMPLE_FLOAT32LE, 44100, 1});
+    pa.open();
     pa.play(output);
-
 	return 0;
 }
