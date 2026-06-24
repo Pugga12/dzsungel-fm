@@ -17,10 +17,11 @@ You should have received a copy of the GNU General Public License
 along with Dzsungel.  If not, see <http://www.gnu.org/license>
 */
 #include <cstdlib>
-#include <memory>
+#include <pulse/sample.h>
 #include "synth/VoiceManager.hpp"
 #include "synth/MidiPreprocessor.hpp"
 #include "Options.h"
+#include "SimplePA.hpp"
 
 extern "C" {
 	#include "dsp/wavetablegen.h"
@@ -30,6 +31,7 @@ extern "C" {
 constexpr size_t WAVETABLE_SIZE = 4096;
 constexpr uint32_t SAMPLE_RATE = 44100;
 constexpr float SAMPLE_RATE_F = static_cast<float>(SAMPLE_RATE);
+using namespace YukiWorkshop;
 
 int main(int argc, char** argv) {
     smf::Options options;
@@ -59,13 +61,16 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    if (options.getArgCount() == 2) {
-        auto& filename = options.getArg(2);
-        writeWavF32(filename.c_str(), output.data(), outputSize, SAMPLE_RATE);
-    } else {
-        const std::string defaultName = "out.wav";
-        writeWavF32(defaultName.c_str(), output.data(), outputSize, SAMPLE_RATE);
-    }
+//    if (options.getArgCount() == 2) {
+//        auto& filename = options.getArg(2);
+//        writeWavF32(filename.c_str(), output.data(), outputSize, SAMPLE_RATE);
+//    } else {
+//        const std::string defaultName = "out.wav";
+//        writeWavF32(defaultName.c_str(), output.data(), outputSize, SAMPLE_RATE);
+//    }
+
+    SimplePA::Player pa("Dzsungel", "Synth Output", {PA_SAMPLE_FLOAT32LE, 44100, 1});
+    pa.play(output);
 
 	return 0;
 }
